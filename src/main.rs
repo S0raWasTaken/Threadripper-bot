@@ -1,9 +1,11 @@
 mod commands;
+mod data_structs;
 mod multi_handler;
 
 use anyhow::Result;
 use dotenv::dotenv;
 use multi_handler::{error_handler, msg_handler};
+use rustbreak::FileDatabase;
 use serenity::{
     async_trait,
     framework::{standard::macros::group, StandardFramework},
@@ -13,12 +15,13 @@ use serenity::{
 };
 use std::{collections::HashSet, env::var};
 
-use commands::ping::*;
+use commands::{ping::*, prefix::*};
+use data_structs::Prefixes;
 
 struct Handler;
 
 #[group]
-#[commands(ping)]
+#[commands(ping, logprefixes, prefix)]
 struct General;
 
 #[async_trait]
@@ -33,6 +36,8 @@ impl EventHandler for Handler {
     }
 }
 
+const DEFAULT_PREFIX: &str = ">>";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv()?;
@@ -43,17 +48,43 @@ async fn main() -> Result<()> {
     let mut owners = HashSet::new();
     owners.insert(http.get_current_application_info().await?.owner.id);
 
-    let framework = StandardFramework::new().configure(|c| {
-        // TODO: implement dynamic prefixes
-        c.owners(owners)
-            .ignore_bots(true)
-            .prefix(">>")
-    }).group(&GENERAL_GROUP);
+    let framework = StandardFramework::new()
+        .configure(|c| {
+            c.owners(owners)
+                .ignore_bots(true)
+                .dynamic_prefix(|ctx, msg| {
+                    Box::pin(async move {
+                        let data = ctx.data.read().await;
+                        if let Some(db) = data.get::<Prefixes>() {
+                            let guild_id = msg.guild_id.unwrap_or_default();
+                            if let Ok(data) = db.borrow_data() {
+                                let prefix = data
+                                    .get(guild_id.as_u64())
+                                    .unwrap_or(&String::from(DEFAULT_PREFIX))
+                                    .to_owned();
+                                Some(prefix)
+                            } else {
+                                Some(String::from(DEFAULT_PREFIX))
+                            }
+                        } else {
+                            Some(String::from(DEFAULT_PREFIX))
+                        }
+                    })
+                })
+        })
+        .group(&GENERAL_GROUP);
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)
         .framework(framework)
         .await?;
+
+    {
+        let mut data = client.data.write().await;
+        data.insert::<Prefixes>(FileDatabase::load_from_path_or_default(
+            "./guild_prefixes.yml",
+        )?);
+    }
 
     client.start().await?;
 
