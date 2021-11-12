@@ -12,7 +12,7 @@ clean:
 	rm -r bin/
 
 test: debug
-  cd test/; clear; ./bot
+	cd test/; clear; ./bot
 
 drun: clean debug
 	cd test/; clear;./bot
