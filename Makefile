@@ -11,5 +11,8 @@ clean:
 	rm -r test/
 	rm -r bin/
 
+test: debug
+  cd test/; clear; ./bot
+
 drun: clean debug
 	cd test/; clear;./bot
