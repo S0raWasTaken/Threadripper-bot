@@ -1,10 +1,10 @@
 use serenity::{
     client::Context,
-    framework::standard::{macros::command, CommandResult},
+    framework::standard::{macros::command, Args, CommandResult},
     model::channel::Message,
 };
 
-use crate::data_structs::Prefixes;
+use crate::{data_structs::Prefixes, DEFAULT_PREFIX};
 
 #[command]
 #[owners_only]
@@ -18,7 +18,9 @@ async fn logprefixes(ctx: &Context, _msg: &Message) -> CommandResult {
 }
 
 #[command]
-async fn prefix(ctx: &Context, msg: &Message) -> CommandResult {
+#[only_in(guilds)]
+#[required_permissions("MANAGE_GUILD")]
+async fn prefix(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let guild_id = msg
         .guild_id
         .ok_or("Couldn't get guild_id")?
@@ -29,19 +31,30 @@ async fn prefix(ctx: &Context, msg: &Message) -> CommandResult {
         .get_mut::<Prefixes>()
         .ok_or("Couldn't get prefixes database")?;
 
-    let prefix = msg.content.split(' ').collect::<Vec<_>>()[1];
+    args.trimmed();
 
-    db.write(|db| {
-        db.insert(guild_id, String::from(prefix));
-    })?;
+    if let Some(prefix) = args.current() {
+        let mut prefix_db = db.get_data(true)?;
+        let old_prefix = prefix_db.get(&guild_id);
+        if prefix == old_prefix.unwrap_or(&String::from(DEFAULT_PREFIX)) {
+            msg.reply_ping(&ctx.http, "No changes made to the guild prefix")
+                .await?;
+        } else {
+            prefix_db.insert(guild_id, String::from(prefix));
+            db.put_data(prefix_db, true)?;
+            db.save()?;
 
-    msg.reply_ping(&ctx.http, format!("Guild prefix changed to `{}`", prefix))
-        .await?;
-
-    match db.save() {
-        Ok(_) => (),
-        Err(why) => eprintln!("{:#?}", why),
+            msg.reply_ping(
+                &ctx.http,
+                format!(
+                    "Guild prefix changed to: `{}`\nNote: ||If you messed up, you can always call me by mentioning me||",
+                    prefix
+                )
+            ).await?;
+        }
+    } else {
+        msg.reply_ping(&ctx.http, "Missing argument: `<prefix>`")
+            .await?;
     }
-
     Ok(())
 }
