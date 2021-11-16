@@ -21,7 +21,7 @@ use data_structs::{MediaChannel, Prefixes};
 struct Handler;
 
 #[group]
-#[commands(ping, logprefixes, prefix, showperms)]
+#[commands(ping, logprefixes, prefix)]
 struct General;
 
 #[async_trait]
