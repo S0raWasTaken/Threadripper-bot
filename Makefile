@@ -1,5 +1,5 @@
 debug:
-	cargo build; mkdir -p test/; mv target/debug/threadripper-bot ./test/bot
+	cargo build; mkdir -p test/; rm -f ./test/bot; mv target/debug/threadripper-bot ./test/bot
 
 release:
 	cargo build --release
