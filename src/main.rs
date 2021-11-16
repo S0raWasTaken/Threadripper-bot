@@ -16,12 +16,12 @@ use serenity::{
 use std::{collections::HashSet, env::var};
 
 use commands::{ping::*, prefix::*};
-use data_structs::Prefixes;
+use data_structs::{MediaChannel, Prefixes};
 
 struct Handler;
 
 #[group]
-#[commands(ping, logprefixes, prefix)]
+#[commands(ping, logprefixes, prefix, showperms)]
 struct General;
 
 #[async_trait]
@@ -43,14 +43,33 @@ async fn main() -> Result<()> {
     dotenv()?;
 
     let token = var("DISCORD_TOKEN")?;
+    let application_id = var("APPLICATION_ID")?.parse()?;
     let http = Http::new_with_token(&token);
 
-    let mut owners = HashSet::new();
-    owners.insert(http.get_current_application_info().await?.owner.id);
+    let (owners, bot_id) = match http.get_current_application_info().await {
+        Ok(info) => {
+            let mut owners = HashSet::new();
+            if let Some(team) = info.team {
+                owners.insert(team.owner_user_id);
+            } else {
+                owners.insert(info.owner.id);
+            }
+            match http.get_current_user().await {
+                Ok(bot_id) => (owners, bot_id.id),
+                Err(why) => panic!("Could not access the bot id: {:?}", why),
+            }
+        }
+        Err(why) => panic!("Could not access application info: {:?}", why),
+    };
 
     let framework = StandardFramework::new()
         .configure(|c| {
             c.owners(owners)
+                .on_mention(Some(bot_id))
+                .ignore_webhooks(true)
+                .delimiters(vec![", ", ",", " "])
+                .allow_dm(false)
+                .with_whitespace(true)
                 .ignore_bots(true)
                 .dynamic_prefix(|ctx, msg| {
                     Box::pin(async move {
@@ -77,12 +96,16 @@ async fn main() -> Result<()> {
     let mut client = Client::builder(&token)
         .event_handler(Handler)
         .framework(framework)
+        .application_id(application_id)
         .await?;
 
     {
         let mut data = client.data.write().await;
         data.insert::<Prefixes>(FileDatabase::load_from_path_or_default(
             "./guild_prefixes.yml",
+        )?);
+        data.insert::<MediaChannel>(FileDatabase::load_from_path_or_default(
+            "./media_channels.yml",
         )?);
     }
 
