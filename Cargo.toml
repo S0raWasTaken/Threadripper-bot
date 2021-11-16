@@ -6,6 +6,7 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0.45"
 dotenv = "0.15.0"
-serenity = { version = "0.10.9", default-features = false, features = ["client", "framework", "standard_framework", "gateway", "rustls_backend", "model"] }
+serenity = { version = "0.10.9", default-features = false, features = ["client", "framework", "standard_framework", "gateway", "rustls_backend", "model", "unstable_discord_api"] }
 tokio = { version = "1.13.0", features = ["macros", "rt-multi-thread"] }
 rustbreak = {version = "2.0.0", features = ["yaml_enc"]}
+serde = {version = "1.0.130", features = ["derive"] }
