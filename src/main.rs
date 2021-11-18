@@ -14,8 +14,9 @@ use serenity::{
     prelude::*,
 };
 use std::{collections::HashSet, env::var};
+use tokio::sync::RwLockWriteGuard;
 
-use commands::{ping::*, prefix::*};
+use commands::{ping::*, prefix::*, threads::*};
 use data_structs::{MediaChannel, Prefixes};
 
 struct Handler;
@@ -23,6 +24,10 @@ struct Handler;
 #[group]
 #[commands(ping, logprefixes, prefix)]
 struct General;
+
+#[group]
+#[commands(set_media_channel)]
+struct ThreadManagement;
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -91,7 +96,8 @@ async fn main() -> Result<()> {
                     })
                 })
         })
-        .group(&GENERAL_GROUP);
+        .group(&GENERAL_GROUP)
+        .group(&THREADMANAGEMENT_GROUP);
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)
@@ -100,7 +106,7 @@ async fn main() -> Result<()> {
         .await?;
 
     {
-        let mut data = client.data.write().await;
+        let mut data: RwLockWriteGuard<TypeMap> = client.data.write().await;
         data.insert::<Prefixes>(FileDatabase::load_from_path_or_default(
             "./guild_prefixes.yml",
         )?);
