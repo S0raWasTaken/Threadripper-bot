@@ -115,7 +115,8 @@ async fn main() -> Result<()> {
         )?);
     }
 
-    client.start().await?;
-
+    if let Err(why) = client.start().await {
+        eprintln!("{}", why);
+    }
     Ok(())
 }
