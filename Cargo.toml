@@ -10,3 +10,4 @@ serenity = { version = "0.10.9", default-features = false, features = ["client",
 tokio = { version = "1.13.0", features = ["macros", "rt-multi-thread"] }
 rustbreak = {version = "2.0.0", features = ["yaml_enc"]}
 serde = {version = "1.0.130", features = ["derive"] }
+clap = "2.33.3"
