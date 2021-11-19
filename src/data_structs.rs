@@ -12,9 +12,9 @@ pub struct MediaChannel;
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ChannelOptions {
-    mod_talk: bool,
-    admin_talk: bool,
-    member_talk: bool,
+    pub mod_talk: bool,
+    pub admin_talk: bool,
+    pub member_talk: bool,
 }
 
 #[allow(dead_code)]
