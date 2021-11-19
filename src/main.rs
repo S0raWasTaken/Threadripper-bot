@@ -26,7 +26,7 @@ struct Handler;
 struct General;
 
 #[group]
-#[commands(set_media_channel)]
+#[commands(set_media_channel, remove_media_channel)]
 struct ThreadManagement;
 
 #[async_trait]
