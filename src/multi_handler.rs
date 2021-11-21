@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use serenity::{
-    client::Context,
+    client::{Cache, Context},
     framework::standard::CommandResult,
     model::{
         channel::{ChannelType::PublicThread, Message},
@@ -25,18 +27,11 @@ pub async fn msg_handler(ctx: Context, msg: Message) -> CommandResult {
             ) {
                 (false, false, true) => {
                     if !msg.attachments.is_empty() {
-                        let guild = msg.guild(&ctx.cache).await;
-
-                        // TODO: thread name, saving threads in db and removing them when needed
-                        if let Some(guild) = guild {
-                            if let Some(guild_channel) = guild.channels.get(&channel_id) {
-                                let _thread = guild_channel
-                                    .create_public_thread(&ctx.http, &msg.id, |c| {
-                                        c.name("test").kind(PublicThread)
-                                    })
-                                    .await?;
-                            }
-                        }
+                        channel_id
+                            .create_public_thread(&ctx.http, msg.id, |c| {
+                                c.name("Test").kind(PublicThread)
+                            })
+                            .await?;
                     }
                 }
 
@@ -58,10 +53,10 @@ pub fn error_handler(result: CommandResult) {
 }
 
 #[allow(dead_code)]
-pub async fn member_perm(member: &Member, ctx: &Context, perm: Permissions) -> Result<bool> {
+pub async fn member_perm(member: &Member, cache: &Arc<Cache>, perm: Permissions) -> Result<bool> {
     for role in &member.roles {
         if role
-            .to_role_cached(&ctx.cache)
+            .to_role_cached(cache)
             .await
             .map_or(false, |r| r.has_permission(perm))
         {
