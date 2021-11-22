@@ -11,33 +11,84 @@ use serenity::{
     },
 };
 
-use crate::data_structs::MediaChannel;
+use crate::{
+    data_structs::{MediaChannel, Prefixes},
+    messages::{MESSAGE_DELETE_HAS_FLAGS, MESSAGE_DELETE_NO_FLAGS},
+    DEFAULT_PREFIX,
+};
 
 pub async fn msg_handler(ctx: Context, msg: Message) -> CommandResult {
+    if msg.author.bot {
+        return Ok(());
+    }
+
     let data = ctx.data.read().await;
+
+    if let Some(prefixes_db) = data.get::<Prefixes>() {
+        let prefixes = prefixes_db.get_data(true)?;
+        let default_prefix = &String::from(DEFAULT_PREFIX);
+        let prefix = prefixes
+            .get(msg.guild_id.unwrap_or_default().as_u64())
+            .unwrap_or(default_prefix);
+        if msg.content.starts_with(prefix) {
+            return Ok(());
+        }
+    };
+
     if let Some(db) = data.get::<MediaChannel>() {
         let tmc_db = db.get_data(true)?;
         let channel_id = msg.channel_id;
 
         if let Some(channel_options) = tmc_db.get(channel_id.as_u64()) {
-            match (
-                channel_options.admin_talk,
-                channel_options.mod_talk,
-                channel_options.member_talk,
-            ) {
-                (false, false, true) => {
-                    if !msg.attachments.is_empty() {
-                        channel_id
-                            .create_public_thread(&ctx.http, msg.id, |c| {
-                                c.name("Test").kind(PublicThread)
-                            })
+            if !msg.attachments.is_empty() {
+                channel_id
+                    .create_public_thread(&ctx.http, msg.id, |c| c.name("Test").kind(PublicThread))
+                    .await?;
+            } else {
+                match (
+                    channel_options.admin_talk,
+                    channel_options.mod_talk,
+                    channel_options.member_talk,
+                ) {
+                    (_, _, true) => (/* Do absolutely nothing */),
+                    (_, true, false) => {
+                        // Check MANAGE_MESSAGES permission
+                        let member = msg.member(&ctx.http).await?;
+                        let has_perm =
+                            member_perm(&member, &ctx.cache, Permissions::MANAGE_MESSAGES).await?;
+
+                        if !has_perm {
+                            msg.author
+                                .direct_message(&ctx.http, |dm| {
+                                    dm.content(MESSAGE_DELETE_HAS_FLAGS)
+                                })
+                                .await?;
+                            msg.delete(&ctx.http).await?;
+                        }
+                    }
+                    (true, false, false) => {
+                        // Check ADMINISTRATOR permission
+                        let member = msg.member(&ctx.http).await?;
+                        let has_perm =
+                            member_perm(&member, &ctx.cache, Permissions::ADMINISTRATOR).await?;
+
+                        if !has_perm {
+                            msg.author
+                                .direct_message(&ctx.http, |dm| {
+                                    dm.content(MESSAGE_DELETE_HAS_FLAGS)
+                                })
+                                .await?;
+                            msg.delete(&ctx.http).await?;
+                        }
+                    }
+                    (_, _, _) => {
+                        /* Delete message anyway */
+                        msg.author
+                            .direct_message(&ctx.http, |dm| dm.content(MESSAGE_DELETE_NO_FLAGS))
                             .await?;
+                        msg.delete(&ctx.http).await?;
                     }
                 }
-
-                (false, true, _) => (),
-                (true, _, _) => (),
-                (_, _, _) => (),
             }
         }
     }
