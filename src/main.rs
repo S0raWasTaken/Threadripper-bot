@@ -1,5 +1,6 @@
 mod commands;
 mod data_structs;
+mod messages;
 mod multi_handler;
 
 use anyhow::Result;
