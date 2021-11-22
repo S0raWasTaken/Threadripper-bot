@@ -6,16 +6,33 @@ use clap::{
 use serenity::{
     client::Context,
     framework::standard::{macros::command, CommandResult},
-    model::channel::Message,
+    model::channel::{ChannelType, Message},
 };
 
-use crate::data_structs::{ChannelOptions, MediaChannel};
+use crate::{
+    data_structs::{ChannelOptions, MediaChannel},
+    messages::{CHANNEL_REMOVED_DB, FORBIDDEN_COMMAND_IN_THREAD, NOT_TMC, TMC_SUCCESS},
+};
 
 #[command]
 #[aliases("smc", "setmedia", "setmediachannel", "media", "mediachannel")]
 #[required_permissions("MANAGE_CHANNELS")]
 async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
-    let matches: _ = App::new("NAME: Set Media Channel")
+    let channel_type = msg
+        .channel_id
+        .to_channel(&ctx.http)
+        .await?
+        .guild()
+        .ok_or("No channel")?
+        .kind;
+
+    if channel_type == ChannelType::PublicThread || channel_type == ChannelType::PrivateThread {
+        msg.reply_ping(&ctx.http, FORBIDDEN_COMMAND_IN_THREAD)
+            .await?;
+        return Ok(());
+    }
+
+    let matches = App::new("NAME: Set Media Channel")
         .setting(ColorNever)
         .setting(DisableVersion)
         .about("\nABOUT: Sets the channel to be a Threadded Media Channel (TMC)")
@@ -62,8 +79,7 @@ async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
             db.put_data(tmc_db, true)?;
             db.save()?;
 
-            msg.reply_ping(&ctx.http, "This channel is now a Threadded Media Channel!")
-                .await?;
+            msg.reply_ping(&ctx.http, TMC_SUCCESS).await?;
         }
         Err(why) => {
             msg.reply_ping(&ctx.http, format!("```yml\n{}```", why.message))
@@ -78,6 +94,20 @@ async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
 #[required_permissions("MANAGE_CHANNELS")]
 #[aliases("rmc", "rmmedia")]
 pub async fn remove_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
+    let channel_type = msg
+        .channel_id
+        .to_channel(&ctx.http)
+        .await?
+        .guild()
+        .ok_or("No channel")?
+        .kind;
+
+    if channel_type == ChannelType::PublicThread || channel_type == ChannelType::PrivateThread {
+        msg.reply_ping(&ctx.http, FORBIDDEN_COMMAND_IN_THREAD)
+            .await?;
+        return Ok(());
+    }
+
     let matches = App::new("NAME: Remove Media Channel")
         .setting(ColorNever)
         .setting(DisableVersion)
@@ -99,11 +129,9 @@ pub async fn remove_media_channel(ctx: &Context, msg: &Message) -> CommandResult
                 db.put_data(tmc_db, true)?;
                 db.save()?;
 
-                msg.reply_ping(&ctx.http, "Channel removed from the database!")
-                    .await?;
+                msg.reply_ping(&ctx.http, CHANNEL_REMOVED_DB).await?;
             } else {
-                msg.reply_ping(&ctx.http, "This channel is not a TMC, no changes made.")
-                    .await?;
+                msg.reply_ping(&ctx.http, NOT_TMC).await?;
             }
         }
         Err(why) => {
