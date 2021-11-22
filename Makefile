@@ -5,6 +5,9 @@ release:
 	cargo build --release
 	mkdir -p bin/
 	mv target/release/threadripper-bot ./bin/threadripper-bot
+	strip ./bin/threadripper-bot
+	sstrip ./bin/threadripper-bot
+	upx --best --lzma ./bin/threadripper-bot
 
 clean:
 	mkdir -p test/ bin/

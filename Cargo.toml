@@ -3,6 +3,11 @@ name = "threadripper-bot"
 version = "0.1.0"
 edition = "2018"
 
+[profile.release]
+lto = true
+codegen-units = 1
+panic = "abort"
+
 [dependencies]
 anyhow = "1.0.45"
 dotenv = "0.15.0"
