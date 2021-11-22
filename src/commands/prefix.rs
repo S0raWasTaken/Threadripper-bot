@@ -4,7 +4,11 @@ use serenity::{
     model::channel::Message,
 };
 
-use crate::{data_structs::Prefixes, DEFAULT_PREFIX};
+use crate::{
+    data_structs::Prefixes,
+    messages::{prefix_changed, MISSING_ARGS_PREFIX, NO_CHANGES_PREFIX},
+    DEFAULT_PREFIX,
+};
 
 #[command]
 #[owners_only]
@@ -37,24 +41,16 @@ async fn prefix(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         let mut prefix_db = db.get_data(true)?;
         let old_prefix = prefix_db.get(&guild_id);
         if prefix == old_prefix.unwrap_or(&String::from(DEFAULT_PREFIX)) {
-            msg.reply_ping(&ctx.http, "No changes made to the guild prefix")
-                .await?;
+            msg.reply_ping(&ctx.http, NO_CHANGES_PREFIX).await?;
         } else {
             prefix_db.insert(guild_id, String::from(prefix));
             db.put_data(prefix_db, true)?;
             db.save()?;
 
-            msg.reply_ping(
-                &ctx.http,
-                format!(
-                    "Guild prefix changed to: `{}`\nNote: ||If you messed up, you can always call me by mentioning me||",
-                    prefix
-                )
-            ).await?;
+            msg.reply_ping(&ctx.http, prefix_changed(prefix)).await?;
         }
     } else {
-        msg.reply_ping(&ctx.http, "Missing argument: `<prefix>`")
-            .await?;
+        msg.reply_ping(&ctx.http, MISSING_ARGS_PREFIX).await?;
     }
     Ok(())
 }
