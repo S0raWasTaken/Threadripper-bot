@@ -5,7 +5,7 @@ use clap::{
 };
 use serenity::{
     client::Context,
-    framework::standard::{macros::command, CommandResult},
+    framework::standard::{macros::command, Args, CommandResult},
     model::channel::{ChannelType, Message},
 };
 
@@ -17,7 +17,7 @@ use crate::{
 #[command]
 #[aliases("smc", "setmedia", "setmediachannel", "media", "mediachannel")]
 #[required_permissions("MANAGE_CHANNELS")]
-async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
+async fn set_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let channel_type = msg
         .channel_id
         .to_channel(&ctx.http)
@@ -31,6 +31,7 @@ async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
             .await?;
         return Ok(());
     }
+    let args = String::from("smc ") + args.rest();
 
     let matches = App::new("NAME: Set Media Channel")
         .setting(ColorNever)
@@ -56,7 +57,7 @@ async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
                     "Make members be able to speak in TMCs outside of threads\nWARNING: pointless",
                 ),
         )
-        .get_matches_from_safe(msg.content.trim().split(' ').collect::<Vec<_>>());
+        .get_matches_from_safe(args.trim().split(' ').collect::<Vec<_>>());
 
     match matches {
         Ok(matches) => {
@@ -93,7 +94,7 @@ async fn set_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
 #[command]
 #[required_permissions("MANAGE_CHANNELS")]
 #[aliases("rmc", "rmmedia")]
-pub async fn remove_media_channel(ctx: &Context, msg: &Message) -> CommandResult {
+pub async fn remove_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let channel_type = msg
         .channel_id
         .to_channel(&ctx.http)
@@ -108,11 +109,13 @@ pub async fn remove_media_channel(ctx: &Context, msg: &Message) -> CommandResult
         return Ok(());
     }
 
+    let args = String::from("rmc ") + args.rest();
+
     let matches = App::new("NAME: Remove Media Channel")
         .setting(ColorNever)
         .setting(DisableVersion)
         .about("\nABOUT: Stops considering the channel a Threadded Media Channel")
-        .get_matches_from_safe(msg.content.trim().split(' ').collect::<Vec<_>>());
+        .get_matches_from_safe(args.trim().split(' ').collect::<Vec<_>>());
 
     match matches {
         Ok(_) => {
