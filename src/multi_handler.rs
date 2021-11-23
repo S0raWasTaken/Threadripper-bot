@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{env::var, sync::Arc};
 
 use anyhow::Result;
 use serenity::{
@@ -30,7 +30,11 @@ pub async fn msg_handler(ctx: Context, msg: Message) -> CommandResult {
         let prefix = prefixes
             .get(msg.guild_id.unwrap_or_default().as_u64())
             .unwrap_or(default_prefix);
-        if msg.content.starts_with(prefix) {
+        if msg.content.starts_with(prefix)
+            || msg
+                .content
+                .starts_with(format!("<!@{}>", var("APPLICATION_ID")?).as_str())
+        {
             return Ok(());
         }
     };
