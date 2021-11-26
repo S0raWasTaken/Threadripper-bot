@@ -45,8 +45,13 @@ pub async fn msg_handler(ctx: Context, msg: Message) -> CommandResult {
 
         if let Some(channel_options) = tmc_db.get(channel_id.as_u64()) {
             if !msg.attachments.is_empty() {
+                let author_name = msg.author.name;
                 channel_id
-                    .create_public_thread(&ctx.http, msg.id, |c| c.name("Test").kind(PublicThread))
+                    .create_public_thread(&ctx.http, msg.id, |c| {
+                        c.name(format!("Media from {}", author_name))
+                            .kind(PublicThread)
+                            .auto_archive_duration(60)
+                    })
                     .await?;
             } else {
                 match (
@@ -107,7 +112,6 @@ pub fn error_handler(result: CommandResult) {
     }
 }
 
-#[allow(dead_code)]
 pub async fn member_perm(member: &Member, cache: &Arc<Cache>, perm: Permissions) -> Result<bool> {
     for role in &member.roles {
         if role
