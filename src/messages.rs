@@ -20,6 +20,6 @@ pub const MESSAGE_DELETE_NO_FLAGS: &str =
 ||Also, feel free to mute this conversation, since I'll only show warnings here and never important stuff.||";
 
 pub const MESSAGE_DELETE_HAS_FLAGS: &str =
-"Messages in that channel are not allowed with your current permissions.
+    "Messages in that channel are not allowed with your current permissions.
 ||Feel free to mute this conversation, I'll only show warnings here and never important stuff.||
 a";
