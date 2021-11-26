@@ -15,7 +15,7 @@ Discord lacks a lot in functionality for threads, so that's why I made this bot
 
 ## Concepts
 Thread owner:
-> A thread owner is a member that created a thread or unarchived it
+> A thread owner is a member that created a thread or unarchived it.<br>
 > It can delete messages inside its own thread channel, remove members from it and do mass actions in his own thread. 
 
 TMC (Threadded media channel):
