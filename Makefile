@@ -7,7 +7,7 @@ release:
 	mv target/release/threadripper-bot ./bin/threadripper-bot
 	strip ./bin/threadripper-bot
 	sstrip ./bin/threadripper-bot
-	upx --best --lzma ./bin/threadripper-bot
+	upx --lzma ./bin/threadripper-bot
 
 clean:
 	mkdir -p test/ bin/
