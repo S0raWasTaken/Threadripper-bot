@@ -1,5 +1,11 @@
+<p>
+  <img src="./threadripper-bot.png" width="100" align="left">
+  </br>
+</p>
+
 # Threadripper-bot
 A Discord bot for control and decentralization of threads management
+
 
 ## About
 Threadripper aims to serve some extra utilities to take better care of thread channels.<br>
