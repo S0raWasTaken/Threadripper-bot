@@ -14,16 +14,16 @@ Discord lacks a lot in functionality for threads, so that's why I made this bot
 - TMC management
 
 ## Concepts
-Thread owner:
+### Thread owner
 > A thread owner is a member that created a thread or unarchived it.<br>
 > It can delete messages inside its own thread channel, remove members from it and do mass actions in his own thread. 
 
-TMC (Threadded media channel):
+### TMC (Threadded media channel)
 > A TMC is an invented concept that describes a pictures/videos/etc channel that members are not allowed to chat.<br>
 > A normal TMC will delete messages from everyone that doesn't include an attachment or the bot's prefix/mention in its message.<br>
 > It will also automatically create a thread for each message that contains an attachment and set their owners accordingly.
 
-Thread inheritance:
+### Thread inheritance
 > Thread inheritance happens when an archived thread is unarchived by a server member.<br>
 > The member that unarchived the thread will inherit it from its previous owner.<br>
 > The old owner will be able to take its ownance back if it requests for it in less than 48h.<br>
