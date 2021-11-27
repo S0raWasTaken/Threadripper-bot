@@ -10,22 +10,11 @@ pub struct MediaChannel;
 // TODO
 // pub struct ThreadOptions {}
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Default)]
 pub struct ChannelOptions {
     pub mod_talk: bool,
     pub admin_talk: bool,
     pub member_talk: bool,
-}
-
-#[allow(dead_code)]
-impl ChannelOptions {
-    pub fn new() -> Self {
-        Self {
-            mod_talk: false,
-            admin_talk: false,
-            member_talk: false,
-        }
-    }
 }
 
 impl TypeMapKey for Prefixes {
