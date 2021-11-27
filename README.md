@@ -57,7 +57,7 @@ You can always make an issue [here](https://github.com/S0raWasTaken/Threadripper
 If you do prefer, you can message me on Matrix or send me an email. Contact information is listed in [my profile](https://github.com/S0raWasTaken)
 
 ### Adding Threadripper to your server
-You can add it to your server by clicking [here](https://discord.com/oauth2/authorize?client_id=907572233835257876&scope=bot&permissions=67234840).<br>
+You can add it to your server by clicking [here](https://discord.com/oauth2/authorize?client_id=907572233835257876&scope=bot&permissions=67234840).<br><br>
 Threadripper doesn't actually need administrator permissions, but it's better to have it on than losing your mind trying to fix permission issues.
 Since it's open source, why not? If you don't trust me, you can deploy your own Threadripper!
 
