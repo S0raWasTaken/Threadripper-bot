@@ -62,11 +62,11 @@ async fn set_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandR
     match matches {
         Ok(matches) => {
             // TODO: Actually do stuff here
-            let mut channel_options = ChannelOptions::new();
-
-            channel_options.admin_talk = matches.is_present("admin_talk");
-            channel_options.mod_talk = matches.is_present("mod_talk");
-            channel_options.member_talk = matches.is_present("member_talk");
+            let channel_options = ChannelOptions {
+                admin_talk: matches.is_present("admin_talk"),
+                mod_talk: matches.is_present("mod_talk"),
+                member_talk: matches.is_present("member_talk"),
+            };
 
             let mut data = ctx.data.write().await;
             let db = data
