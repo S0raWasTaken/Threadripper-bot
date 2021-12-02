@@ -10,7 +10,7 @@ pub struct MediaChannel;
 // TODO
 // pub struct ThreadOptions {}
 
-#[derive(Clone, Serialize, Deserialize, Default)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct ChannelOptions {
     pub mod_talk: bool,
     pub admin_talk: bool,
