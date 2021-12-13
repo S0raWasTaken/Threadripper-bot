@@ -23,3 +23,11 @@ pub const MESSAGE_DELETE_HAS_FLAGS: &str =
     "Messages in that channel are not allowed with your current permissions.
 ||Feel free to mute this conversation, I'll only show warnings here and never important stuff.||
 a";
+
+// commands/moderation.rs
+pub const MISSING_PERM_OR_TO: &str = "Missing `MANAGE_MESSAGES` permission or Thread ownership";
+pub const OVERFLOWED_AMMOUNT: &str = "Argument `AMMOUNT` requires a number above 0 and below 101";
+pub const VALID_ID_FROM_MSG: &str = "Option `FROM_MESSAGE` requires a valid message ID";
+pub const ZERO_MESSAGES: &str = "No messages to purge.";
+pub const INVALID_AMMOUNT: &str = "Argument `AMMOUNT` requires a valid number";
+pub const INVALID_MENTION: &str = "Option `USER` requires a valid mention or ID";
