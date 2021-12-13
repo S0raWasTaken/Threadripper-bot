@@ -125,3 +125,15 @@ pub async fn member_perm(member: &Member, cache: &Arc<Cache>, perm: Permissions)
 
     Ok(false)
 }
+
+#[macro_export]
+macro_rules! ensure {
+    ($($x:expr, $y:tt),* $(,)?) => {
+        $(
+            if !$x {
+                $y();
+                return Ok(());
+            }
+        )*
+    };
+}
