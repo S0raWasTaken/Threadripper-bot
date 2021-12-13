@@ -17,7 +17,7 @@ use serenity::{
 use std::{collections::HashSet, env::var};
 use tokio::sync::RwLockWriteGuard;
 
-use commands::{ping::*, prefix::*, threads::*};
+use commands::{moderation::*, ping::*, prefix::*, threads::*};
 use data_structs::{MediaChannel, Prefixes};
 
 struct Handler;
@@ -29,6 +29,10 @@ struct General;
 #[group]
 #[commands(set_media_channel, remove_media_channel)]
 struct ThreadManagement;
+
+#[group]
+#[commands(clear)]
+struct Moderation;
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -98,7 +102,8 @@ async fn main() -> Result<()> {
                 })
         })
         .group(&GENERAL_GROUP)
-        .group(&THREADMANAGEMENT_GROUP);
+        .group(&THREADMANAGEMENT_GROUP)
+        .group(&MODERATION_GROUP);
 
     let mut client = Client::builder(&token)
         .event_handler(Handler)
