@@ -22,7 +22,7 @@ pub const MESSAGE_DELETE_NO_FLAGS: &str =
 pub const MESSAGE_DELETE_HAS_FLAGS: &str =
     "Messages in that channel are not allowed with your current permissions.
 ||Feel free to mute this conversation, I'll only show warnings here and never important stuff.||
-a";
+";
 
 // commands/moderation.rs
 pub const MISSING_PERM_OR_TO: &str = "Missing `MANAGE_MESSAGES` permission or Thread ownership";
@@ -31,3 +31,22 @@ pub const VALID_ID_FROM_MSG: &str = "Option `FROM_MESSAGE` requires a valid mess
 pub const ZERO_MESSAGES: &str = "No messages to purge.";
 pub const INVALID_AMMOUNT: &str = "Argument `AMMOUNT` requires a valid number";
 pub const INVALID_MENTION: &str = "Option `USER` requires a valid mention or ID";
+
+// commands/help.rs
+pub const COMMAND_LIST: &str = "```yml
+Available commands:
+  - help { man }
+  - smc { set_media_channel, setmedia }
+  - rmc { remove_media_channel, rmmedia }
+  - ping
+  - prefix
+  - clear { cls, rm }
+
+Try:
+    help [COMMAND]
+```";
+pub const WEIRD_SUCCESS: &str = "
+Something weird happened and I couldn't fetch the help from your command
+You still could try `command --help`
+";
+pub const COMMAND_NOT_FOUND: &str = "404! Command not Found...";

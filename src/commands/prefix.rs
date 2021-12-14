@@ -7,6 +7,7 @@ use serenity::{
 use crate::{
     data_structs::Prefixes,
     messages::{prefix_changed, MISSING_ARGS_PREFIX, NO_CHANGES_PREFIX},
+    multi_handler::parse_command,
     DEFAULT_PREFIX,
 };
 
@@ -24,7 +25,7 @@ async fn logprefixes(ctx: &Context, _msg: &Message) -> CommandResult {
 #[command]
 #[only_in(guilds)]
 #[required_permissions("MANAGE_GUILD")]
-async fn prefix(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn prefix(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let guild_id = msg
         .guild_id
         .ok_or("Couldn't get guild_id")?
@@ -35,22 +36,35 @@ async fn prefix(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .get_mut::<Prefixes>()
         .ok_or("Couldn't get prefixes database")?;
 
-    args.trimmed();
+    let args = String::from("prefix ") + args.rest();
 
-    if let Some(prefix) = args.current() {
-        let mut prefix_db = db.get_data(true)?;
-        let old_prefix = prefix_db.get(&guild_id);
-        if prefix == old_prefix.unwrap_or(&String::from(DEFAULT_PREFIX)) {
-            msg.reply_ping(&ctx.http, NO_CHANGES_PREFIX).await?;
-        } else {
-            prefix_db.insert(guild_id, String::from(prefix));
-            db.put_data(prefix_db, true)?;
-            db.save()?;
+    let matches = parse_command("prefix")
+        .ok_or("Command not found, somehow?")?
+        .get_matches_from_safe(args.trim().split(' ').collect::<Vec<_>>());
 
-            msg.reply_ping(&ctx.http, prefix_changed(prefix)).await?;
+    match matches {
+        Ok(matches) => {
+            if let Some(prefix) = matches.value_of("prefix") {
+                let mut prefix_db = db.get_data(true)?;
+                let old_prefix = prefix_db.get(&guild_id);
+                if prefix == old_prefix.unwrap_or(&String::from(DEFAULT_PREFIX)) {
+                    msg.reply_ping(&ctx.http, NO_CHANGES_PREFIX).await?;
+                } else {
+                    prefix_db.insert(guild_id, String::from(prefix));
+                    db.put_data(prefix_db, true)?;
+                    db.save()?;
+
+                    msg.reply_ping(&ctx.http, prefix_changed(prefix)).await?;
+                }
+            } else {
+                msg.reply_ping(&ctx.http, MISSING_ARGS_PREFIX).await?;
+            }
         }
-    } else {
-        msg.reply_ping(&ctx.http, MISSING_ARGS_PREFIX).await?;
+        Err(why) => {
+            msg.reply_ping(&ctx.http, format!("```yml\n{}```", why))
+                .await?;
+        }
     }
+
     Ok(())
 }

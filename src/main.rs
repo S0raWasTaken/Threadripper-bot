@@ -17,13 +17,13 @@ use serenity::{
 use std::{collections::HashSet, env::var};
 use tokio::sync::RwLockWriteGuard;
 
-use commands::{moderation::*, ping::*, prefix::*, threads::*};
+use commands::{help::*, moderation::*, ping::*, prefix::*, threads::*};
 use data_structs::{MediaChannel, Prefixes};
 
 struct Handler;
 
 #[group]
-#[commands(ping, logprefixes, prefix)]
+#[commands(ping, logprefixes, prefix, help)]
 struct General;
 
 #[group]
@@ -77,7 +77,7 @@ async fn main() -> Result<()> {
             c.owners(owners)
                 .on_mention(Some(bot_id))
                 .ignore_webhooks(true)
-                .delimiters(vec![", ", ",", " "])
+                .delimiters([", ", ",", " "])
                 .allow_dm(false)
                 .with_whitespace(true)
                 .ignore_bots(true)

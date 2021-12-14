@@ -1,8 +1,3 @@
-use clap::{
-    App,
-    AppSettings::{ColorNever, DisableVersion},
-    Arg,
-};
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},
@@ -12,10 +7,12 @@ use serenity::{
 use crate::{
     data_structs::{ChannelOptions, MediaChannel},
     messages::{CHANNEL_REMOVED_DB, FORBIDDEN_COMMAND_IN_THREAD, NOT_TMC, TMC_SUCCESS},
+    multi_handler::parse_command,
 };
 
 #[command]
 #[aliases("smc", "setmedia", "setmediachannel", "media", "mediachannel")]
+#[only_in(guilds)]
 #[required_permissions("MANAGE_CHANNELS")]
 async fn set_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let channel_type = msg
@@ -33,30 +30,8 @@ async fn set_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandR
     }
     let args = String::from("smc ") + args.rest();
 
-    let matches = App::new("NAME: Set Media Channel")
-        .setting(ColorNever)
-        .setting(DisableVersion)
-        .about("\nABOUT: Sets the channel to be a Threadded Media Channel (TMC)")
-        .arg(
-            Arg::with_name("admin_talk")
-                .long("admin")
-                .short("a")
-                .help("Admins are able to speak in TMCs outside of threads"),
-        )
-        .arg(
-            Arg::with_name("mod_talk")
-                .long("mod")
-                .short("m")
-                .help("Make mods be able to speak in TMCs outside of threads (MANAGE_MESSAGES)"),
-        )
-        .arg(
-            Arg::with_name("member_talk")
-                .long("member")
-                .short("M")
-                .help(
-                    "Make members be able to speak in TMCs outside of threads\nWARNING: pointless",
-                ),
-        )
+    let matches = parse_command("smc")
+        .ok_or("Command not found, somehow?")?
         .get_matches_from_safe(args.trim().split(' ').collect::<Vec<_>>());
 
     match matches {
@@ -93,6 +68,7 @@ async fn set_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandR
 
 #[command]
 #[required_permissions("MANAGE_CHANNELS")]
+#[only_in(guilds)]
 #[aliases("rmc", "rmmedia")]
 pub async fn remove_media_channel(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let channel_type = msg
@@ -111,10 +87,8 @@ pub async fn remove_media_channel(ctx: &Context, msg: &Message, args: Args) -> C
 
     let args = String::from("rmc ") + args.rest();
 
-    let matches = App::new("NAME: Remove Media Channel")
-        .setting(ColorNever)
-        .setting(DisableVersion)
-        .about("\nABOUT: Stops considering the channel a Threadded Media Channel")
+    let matches = parse_command("rmc")
+        .ok_or("Command not found, somehow?")?
         .get_matches_from_safe(args.trim().split(' ').collect::<Vec<_>>());
 
     match matches {

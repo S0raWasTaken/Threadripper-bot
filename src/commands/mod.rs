@@ -1,3 +1,4 @@
+pub mod help;
 pub mod moderation;
 pub mod ping;
 pub mod prefix;
