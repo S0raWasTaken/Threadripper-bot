@@ -1,6 +1,11 @@
 use std::{env::var, sync::Arc};
 
 use anyhow::Result;
+use clap::{
+    App,
+    AppSettings::{ColorNever, DisableVersion},
+    Arg,
+};
 use serenity::{
     client::{Cache, Context},
     framework::standard::CommandResult,
@@ -136,4 +141,135 @@ macro_rules! ensure {
             }
         )*
     };
+}
+
+pub fn parse_command(cmd: &str) -> Option<App<'static, 'static>> {
+    // Commands
+    match cmd {
+        "smc" | "setmedia" | "setmediachannel" | "media" | "mediachannel" | "set_media_channel"  => {
+            Some(
+                App::new("NAME: Set Media Channel")
+                    .setting(ColorNever)
+                    .setting(DisableVersion)
+                    .about("\nABOUT: Sets the channel to be a Threadded Media Channel (TMC)")
+                    .arg(
+                        Arg::with_name("admin_talk")
+                            .long("admin")
+                            .short("a")
+                            .help("Admins are able to speak in TMCs outside of threads"),
+                    )
+                    .arg(
+                        Arg::with_name("mod_talk")
+                            .long("mod")
+                            .short("m")
+                            .help("Make mods be able to speak in TMCs outside of threads (MANAGE_MESSAGES)"),
+                    )
+                    .arg(
+                        Arg::with_name("member_talk")
+                            .long("member")
+                            .short("M")
+                            .help(
+                                "Make members be able to speak in TMCs outside of threads\nWARNING: pointless",
+                            ),
+                    )
+            )
+
+        },
+
+        "rmc" | "rmmedia" | "remove_media_channel" => {
+            Some(
+                App::new("NAME: Remove Media Channel")
+                    .setting(ColorNever)
+                    .setting(DisableVersion)
+                    .about("\nABOUT: Stops considering the channel a Threadded Media Channel")
+            )
+
+        },
+
+        "ping" => {
+            Some(
+                App::new("NAME: Ping")
+                    .setting(ColorNever)
+                    .setting(DisableVersion)
+                    .about("\nABOUT: Pings discord.com")
+            )
+        },
+        "help" | "man" => {
+            Some(
+                App::new("NAME: Help")
+                    .setting(ColorNever)
+                    .setting(DisableVersion)
+                    .about("\nABOUT: Asks for help")
+                    .arg(
+                        Arg::with_name("command")
+                            .takes_value(true)
+                            .index(1)
+                            .help("Specifies a command to get help")
+                    )
+            )
+        },
+
+        "prefix" => {
+            Some(
+                App::new("NAME: Prefix")
+                    .setting(ColorNever)
+                    .setting(DisableVersion)
+                    .about("\nABOUT: Modifies the guild prefix")
+                    .arg(
+                        Arg::with_name("prefix")
+                            .required(true)
+                            .takes_value(true)
+                            .index(1)
+                    )
+            )
+        },
+
+        "clear" | "rm" | "cls" => {
+            Some(
+                App::new("NAME: Clear")
+                    .setting(ColorNever)
+                    .setting(DisableVersion)
+                    .about("\nABOUT: Bulk deletes messages in a channel")
+                    .arg(
+                        Arg::with_name("ammount")
+                            .required(true)
+                            .help("The ammount of messages to bulk delete (<100)")
+                            .index(1),
+                    )
+                    .arg(
+                        Arg::with_name("@mention/ID")
+                            .long("user")
+                            .short("u")
+                            .takes_value(true)
+                            .help("Specify a user to delete messages"),
+                    )
+                    .arg(
+                        Arg::with_name("from_message")
+                            .long("message")
+                            .short("m")
+                            .takes_value(true)
+                            .help("Specify a message to start counting by"),
+                    )
+                    .arg(
+                        Arg::with_name("after")
+                            .conflicts_with("before")
+                            .requires("from_message")
+                            .long("after")
+                            .short("a")
+                            .help("Selects messages after the selected message"),
+                    )
+                    .arg(
+                        Arg::with_name("before")
+                            .conflicts_with("after")
+                            .requires("from_message")
+                            .long("before")
+                            .short("b")
+                            .help("Selects messages before the selected message"),
+                    )
+
+            )
+        }
+
+        _ => None,
+    }
 }
