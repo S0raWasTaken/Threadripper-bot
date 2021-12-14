@@ -1,10 +1,5 @@
 use std::convert::TryFrom;
 
-use clap::{
-    App,
-    AppSettings::{ColorNever, DisableVersion},
-    Arg,
-};
 use serenity::{
     client::Context,
     framework::standard::{macros::command, Args, CommandResult},
@@ -18,57 +13,20 @@ use crate::{
         INVALID_AMMOUNT, INVALID_MENTION, MISSING_PERM_OR_TO, OVERFLOWED_AMMOUNT,
         VALID_ID_FROM_MSG, ZERO_MESSAGES,
     },
-    multi_handler::member_perm,
+    multi_handler::{member_perm, parse_command},
 };
 
 // TODO: Clear command to Thread Owner
 #[command]
+#[only_in(guilds)]
 #[aliases("cls", "rm")]
 async fn clear(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let member = msg.member(&ctx.http).await?;
     let perm = member_perm(&member, &ctx.cache, Permissions::MANAGE_MESSAGES).await?;
     let args = String::from("clear ") + args.rest();
 
-    let matches = App::new("NAME: Clear")
-        .setting(ColorNever)
-        .setting(DisableVersion)
-        .about("\nABOUT: Bulk deletes messages in a channel")
-        .arg(
-            Arg::with_name("ammount")
-                .required(true)
-                .help("The ammount of messages to bulk delete (<100)")
-                .index(1),
-        )
-        .arg(
-            Arg::with_name("@mention/ID")
-                .long("user")
-                .short("u")
-                .takes_value(true)
-                .help("Specify a user to delete messages"),
-        )
-        .arg(
-            Arg::with_name("from_message")
-                .long("message")
-                .short("m")
-                .takes_value(true)
-                .help("Specify a message to start counting by"),
-        )
-        .arg(
-            Arg::with_name("after")
-                .conflicts_with("before")
-                .requires("from_message")
-                .long("after")
-                .short("a")
-                .help("Selects messages after the selected message"),
-        )
-        .arg(
-            Arg::with_name("before")
-                .conflicts_with("after")
-                .requires("from_message")
-                .long("before")
-                .short("b")
-                .help("Selects messages before the selected message"),
-        )
+    let matches = parse_command("clear")
+        .ok_or("Command not found, somehow?")?
         .get_matches_from_safe(args.trim().split(' ').collect::<Vec<_>>());
 
     match matches {
