@@ -119,9 +119,11 @@ pub fn error_handler(result: CommandResult) {
 
 pub async fn member_perm(member: &Member, cache: &Arc<Cache>, perm: Permissions) -> Result<bool> {
     for role in &member.roles {
-        if role.to_role_cached(cache).await.map_or(false, |r| {
+        let has_perm = role.to_role_cached(cache).await.map_or(false, |r| {
             r.has_permission(perm) || r.has_permission(Permissions::ADMINISTRATOR)
-        }) {
+        });
+
+        if has_perm {
             return Ok(true);
         }
     }
