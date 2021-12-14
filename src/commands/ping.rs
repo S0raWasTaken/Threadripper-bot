@@ -10,12 +10,6 @@ use crate::multi_handler::parse_command;
 
 #[command]
 async fn ping(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    /* Content of /usr/local/bin/special_ping.sh:
-
-    #!/bin/bash
-    ping -qc1 discord.com 2>&1 | awk -F'/' 'END{ print (/^rtt/? "+ OK "$5" ms":"- FAIL") }'
-
-     */
     let args = String::from("ping ") + args.rest();
 
     let matches = parse_command("ping")
