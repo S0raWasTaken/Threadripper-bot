@@ -6,6 +6,7 @@ use clap::{
     AppSettings::{ColorNever, DisableVersion},
     Arg,
 };
+use reqwest::get;
 use serenity::{
     client::{Cache, Context},
     framework::standard::CommandResult,
@@ -49,7 +50,9 @@ pub async fn msg_handler(ctx: Context, msg: Message) -> CommandResult {
         let channel_id = msg.channel_id;
 
         if let Some(channel_options) = tmc_db.get(channel_id.as_u64()) {
-            if !msg.attachments.is_empty() {
+            if !msg.attachments.is_empty()
+                || has_media(msg.content.split(' ').collect::<Vec<_>>()).await
+            {
                 let author_name = msg.author.name;
                 channel_id
                     .create_public_thread(&ctx.http, msg.id, |c| {
@@ -129,6 +132,21 @@ pub async fn member_perm(member: &Member, cache: &Arc<Cache>, perm: Permissions)
     }
 
     Ok(false)
+}
+
+pub async fn has_media(content: Vec<&str>) -> bool {
+    for link in content {
+        if link.starts_with("http://") || link.starts_with("https://") {
+            if let Ok(res) = get(link).await {
+                return res.error_for_status().is_ok();
+            } else {
+                continue;
+            }
+        } else {
+            continue;
+        }
+    }
+    false
 }
 
 #[macro_export]
